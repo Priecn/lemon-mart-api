@@ -20,6 +20,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
 
 @EnableWebSecurity
 @Configuration
@@ -46,6 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(passwordEncoder());
     }
 
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
@@ -58,6 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.cors();
         http.csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(entryPoint).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
@@ -74,6 +80,34 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers(HttpMethod.POST, authenticationPath)
                 .and().ignoring().antMatchers(HttpMethod.GET, "/", "/*.html", "/favicon.ico", "/**/*.html", "/**/*.css", "/**/*.js")
                 .and().ignoring().antMatchers(HttpMethod.GET,"/h2-console/**/**");
+    }
+
+    /*@Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("https://localhost:5000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS"));
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }*/
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:5000");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("OPTIONS");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("POST");
+        config.addAllowedMethod("PUT");
+        config.addAllowedMethod("DELETE");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 }
 

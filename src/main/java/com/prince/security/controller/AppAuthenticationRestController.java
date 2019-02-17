@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 @RestController
+@RequestMapping("v1")
 public class AppAuthenticationRestController {
 
     @Value("${jwt.header}")
@@ -40,7 +41,7 @@ public class AppAuthenticationRestController {
         this.userDetailsService = userDetailsService;
     }
 
-    @PostMapping(value = "/auth")
+    @PostMapping(value = "/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AppAuthenticationRequest authenticationRequest) {
         System.out.println(authenticationRequest.getEmail()+" "+authenticationRequest.getUsername()+" "+authenticationRequest.getPassword());
         String username = authenticationRequest.getUsername();
@@ -52,7 +53,7 @@ public class AppAuthenticationRestController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         final String token = tokenUtil.generateToken(userDetails);
-
+        System.out.println(token);
         return ResponseEntity.ok(new AppAuthenticationResponse(token));
     }
 

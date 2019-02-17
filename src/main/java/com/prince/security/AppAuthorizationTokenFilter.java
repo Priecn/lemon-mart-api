@@ -36,7 +36,7 @@ public class AppAuthorizationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         logger.info("processing authentication for '{}'", httpServletRequest.getRequestURL());
-
+        logger.info("processing authentication for '{}'", httpServletRequest.getMethod());
         final String requestHeader = httpServletRequest.getHeader(this.tokenHeader);
         String username = null;
         String authToken = null;

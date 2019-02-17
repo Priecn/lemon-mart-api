@@ -7,14 +7,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.DefaultClock;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class AppTokenUtil implements Serializable {
@@ -30,15 +32,19 @@ public class AppTokenUtil implements Serializable {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+        Set<String> authorities = userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())
+                .collect(Collectors.toSet());
+        return doGenerateToken(claims, userDetails.getUsername(), authorities);
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    private String doGenerateToken(Map<String, Object> claims, String subject, Set<String> authorities) {
         final Date createdDate = clock.now();
         final Date expirationDate = calculateExpirationDate(createdDate);
 
         return Jwts.builder()
                 .setClaims(claims)
+                .claim("AUTHORITIES", authorities)
                 .setSubject(subject)
                 .setIssuedAt(createdDate)
                 .setExpiration(expirationDate)
@@ -80,11 +86,11 @@ public class AppTokenUtil implements Serializable {
      return getClaimFromToken(token, Claims::getSubject);
     }
 
-    public Date getIssuedAtDateFromToken(String token) {
+    private Date getIssuedAtDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getIssuedAt);
     }
 
-    public Date getExpirationDateFromToken(String token) {
+    private Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
