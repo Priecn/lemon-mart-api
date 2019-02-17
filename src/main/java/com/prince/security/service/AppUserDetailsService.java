@@ -26,4 +26,11 @@ public class AppUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Couldn't find user "+ username);
         return UserDetailHelper.create(userOptional.get());
     }
+
+    public String getUsernameByEmail(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(!userOptional.isPresent())
+            throw new UsernameNotFoundException(email + " not registered.");
+        return userOptional.get().getUsername();
+    }
 }

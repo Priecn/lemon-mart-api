@@ -5,6 +5,7 @@ import com.prince.security.exception.AppAuthenticationException;
 import com.prince.security.model.AppAuthenticationRequest;
 import com.prince.security.model.AppAuthenticationResponse;
 import com.prince.security.model.UserModel;
+import com.prince.security.service.AppUserDetailsService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
@@ -41,10 +42,15 @@ public class AppAuthenticationRestController {
 
     @PostMapping(value = "/auth")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AppAuthenticationRequest authenticationRequest) {
-        System.out.println(authenticationRequest.getUsername()+" "+authenticationRequest.getPassword());
-        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        System.out.println(authenticationRequest.getEmail()+" "+authenticationRequest.getUsername()+" "+authenticationRequest.getPassword());
+        String username = authenticationRequest.getUsername();
+        String email = authenticationRequest.getEmail();
+        if(username == null && email != null) {
+            username = ((AppUserDetailsService)userDetailsService).getUsernameByEmail(email);
+        }
+        authenticate(username, authenticationRequest.getPassword());
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         final String token = tokenUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AppAuthenticationResponse(token));
