@@ -10,6 +10,9 @@ import java.util.Date;
 public class UserModel implements UserDetails {
 
     @JsonIgnore
+    private static final long serialVersionUID = -3536766059739347616L;
+    
+    @JsonIgnore
     private final Long id;
     private final String username;
     @JsonIgnore

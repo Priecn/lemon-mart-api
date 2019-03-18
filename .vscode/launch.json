@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-JwtAuthServiceApplication<jwt-auth-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.prince.JwtAuthServiceApplication",
+            "projectName": "jwt-auth-service",
+            "args": ""
+        }
+    ]
+}

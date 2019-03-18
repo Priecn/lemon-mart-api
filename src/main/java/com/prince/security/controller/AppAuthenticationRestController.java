@@ -4,11 +4,12 @@ import com.prince.security.AppTokenUtil;
 import com.prince.security.exception.AppAuthenticationException;
 import com.prince.security.model.AppAuthenticationRequest;
 import com.prince.security.model.AppAuthenticationResponse;
+import com.prince.security.model.ListResponse;
+import com.prince.security.model.UserCommand;
 import com.prince.security.model.UserModel;
 import com.prince.security.service.AppUserDetailsService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -43,7 +46,6 @@ public class AppAuthenticationRestController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AppAuthenticationRequest authenticationRequest) {
-        System.out.println(authenticationRequest.getEmail()+" "+authenticationRequest.getUsername()+" "+authenticationRequest.getPassword());
         String username = authenticationRequest.getUsername();
         String email = authenticationRequest.getEmail();
         if(username == null && email != null) {
@@ -53,7 +55,6 @@ public class AppAuthenticationRestController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         final String token = tokenUtil.generateToken(userDetails);
-        System.out.println(token);
         return ResponseEntity.ok(new AppAuthenticationResponse(token));
     }
 
@@ -86,5 +87,30 @@ public class AppAuthenticationRestController {
         } catch (BadCredentialsException e) {
             throw new AppAuthenticationException("Bad credential!", e);
         }
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<UserCommand> getUserByUserName(@PathVariable String username) {
+        UserCommand user = ((AppUserDetailsService)userDetailsService).getUserCommandByUsername(username);
+        return ResponseEntity.ok().body(user);
+    }
+    
+    //@Secured({"ROLE_MANAGER"})
+    @GetMapping("/users")
+    public ResponseEntity<ListResponse<UserCommand>> getAllUsers() {
+        List<UserCommand> users = ((AppUserDetailsService)userDetailsService).getAllUsers();
+        return ResponseEntity.ok().body(new ListResponse<UserCommand>(users.size(), users));
+    }
+
+    @PutMapping("/user/{username}")
+    public ResponseEntity<UserCommand> updateUserByUserName(@PathVariable String username, @RequestBody UserCommand user) {
+        UserCommand updatedUser = ((AppUserDetailsService)userDetailsService).updateUserCommandByUsername(username, user);
+        return ResponseEntity.ok().body(updatedUser);
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<UserCommand> addUser(@RequestBody UserCommand user) {
+        UserCommand updatedUser = ((AppUserDetailsService)userDetailsService).addUser(user);
+        return ResponseEntity.ok().body(updatedUser);
     }
 }

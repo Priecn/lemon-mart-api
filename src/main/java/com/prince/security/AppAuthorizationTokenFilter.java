@@ -38,12 +38,14 @@ public class AppAuthorizationTokenFilter extends OncePerRequestFilter {
         logger.info("processing authentication for '{}'", httpServletRequest.getRequestURL());
         logger.info("processing authentication for '{}'", httpServletRequest.getMethod());
         final String requestHeader = httpServletRequest.getHeader(this.tokenHeader);
+        logger.info("Header '{}'", requestHeader);
         String username = null;
         String authToken = null;
 
         if(requestHeader != null && requestHeader.startsWith("Bearer ")) {
             authToken = requestHeader.substring(7);
             try {
+            	logger.info("Token '{}'", authToken);
                 username = appTokenUtil.getUsernameFromToken(authToken);
             } catch (IllegalArgumentException e) {
                 logger.error("an error occurred during getting username from token ", e);
